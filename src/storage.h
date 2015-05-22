@@ -14,6 +14,9 @@ public:
 	class ClassStrings { 
 	private: map<int,string> list;
 	public: ClassStrings (map<int,string>); map<int,string> GameStrings::ClassStrings::getList(); ClassStrings(); };
+	class ItemBaseStrings { 
+	private: map<int,string> list;
+	public: ItemBaseStrings (map<int,string>); map<int,string> GameStrings::ItemBaseStrings::getList(); ItemBaseStrings(); };
 	class ItemPrefixStrings { 
 	private: map<int,string> list;
 	public: ItemPrefixStrings (map<int,string>); map<int,string> GameStrings::ItemPrefixStrings::getList(); ItemPrefixStrings(); };
@@ -27,18 +30,24 @@ GameStrings::ClassStrings::ClassStrings()                  { map<int,string> n_l
 GameStrings::ClassStrings::ClassStrings                    ( map<int, string> n_list ) { list = n_list; }
 map<int, string> GameStrings::ClassStrings::getList()      { return list; }
 
+GameStrings::ItemBaseStrings::ItemBaseStrings()            { map<int,string> n_list; list = n_list; }
+GameStrings::ItemBaseStrings::ItemBaseStrings              ( map<int, string> n_list ) { list = n_list; }
+map<int, string> GameStrings::ItemBaseStrings::getList()   { return list; }
+
 GameStrings::ItemPrefixStrings::ItemPrefixStrings()        { map<int,string> n_list; list = n_list; }
 GameStrings::ItemPrefixStrings::ItemPrefixStrings          ( map<int, string> n_list ) { list = n_list; }
 map<int, string> GameStrings::ItemPrefixStrings::getList() { return list; }
 
-GameStrings::RaceStrings  racestrings;
-GameStrings::ClassStrings classstrings;
+GameStrings::RaceStrings       racestrings;
+GameStrings::ClassStrings      classstrings;
+GameStrings::ItemBaseStrings   basestrings;
 GameStrings::ItemPrefixStrings prefixstrings;
 
 void LoadAllStrings() 
 {
 	map<int,string>          rc_m;
 	map<int,string>          cl_m;
+	map<int,string>          ib_m;
 	map<int,string>          pf_m;
 
 	//RACES
@@ -98,7 +107,22 @@ void LoadAllStrings()
 	cl_m[39]=                "Witch Doctor";
 	cl_m[40]=                "Commander";     //This is where I stop caring about A-Z ordering
 
-	racestrings  =           GameStrings::RaceStrings(rc_m);
-	classstrings =           GameStrings::ClassStrings(cl_m);
+	//ITEM BASE STRINGS
+	ib_m[0] =                "Tattered Robe";
+	ib_m[1] =                "Worn Chestplate";
+	ib_m[2] =                "Old Tunic";
+	ib_m[3] =                "Lead Pipe";
+
+	//ITEM PREFIX STRINGS
+	pf_m[0] =                "Golden "; //Note: Space before endquote makes my life easier.
+	pf_m[1] =                "Shimmering ";
+	pf_m[2] =                "Seething ";
+	pf_m[3] =                "Reinforced ";
+	pf_m[4] =                "Thirsty ";
+	pf_m[5] =                "Piercing ";
+
+	racestrings  =           GameStrings::RaceStrings      (rc_m);
+	classstrings =           GameStrings::ClassStrings     (cl_m);
+	basestrings  =           GameStrings::ItemBaseStrings  (ib_m);
 	prefixstrings=           GameStrings::ItemPrefixStrings(pf_m);
 }

@@ -10,7 +10,7 @@
 std::string H_MSG_LOGIN_RESPONSE(std::string data)
 {
 	std::vector<std::string> strs = split(data, ',');
-	if (strs[0]=="Success") { return "success"; } else { return "failure"; }
+	if (strs[0]=="Success") { return "success"; std::cout << "success"; } else { return "failure"; std::cout << "failure"; }
 }
 std::vector<std::string> H_MSG_CHARACTER_LIST(std::string data)
 {

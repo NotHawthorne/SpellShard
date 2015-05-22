@@ -40,7 +40,7 @@ void CreateLoginMenu()
     ImGui::End();
 }
 
-void PopulateCharacterList(std::vector<std::string> list)  //MAKE LISTBOX
+void PopulateCharacterList(std::vector<std::string> list)
 {
 	const char* listbox_items[128];
 	std::string end_endtext;
