@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="imgui.cpp">
+      <Filter>external\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_impl_glfw.cpp">
+      <Filter>external\imgui</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="main.h" />
+    <ClInclude Include="imgui_impl_glfw.h">
+      <Filter>external\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imconfig.h">
+      <Filter>external\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui.h">
+      <Filter>external\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="strsplit.h">
+      <Filter>external</Filter>
+    </ClInclude>
+    <ClInclude Include="handlers.h">
+      <Filter>networking</Filter>
+    </ClInclude>
+    <ClInclude Include="messaging.h">
+      <Filter>networking</Filter>
+    </ClInclude>
+    <ClInclude Include="mesh.h">
+      <Filter>rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="storage.h">
+      <Filter>data</Filter>
+    </ClInclude>
+    <ClInclude Include="gui.h">
+      <Filter>gui</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="external">
+      <UniqueIdentifier>{a527baf2-946b-4fca-8618-2ee31722c5f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\imgui">
+      <UniqueIdentifier>{4d12d85a-07b5-40e7-9c30-a78ce0eb99f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="networking">
+      <UniqueIdentifier>{099f21a7-70df-4089-a5e9-53dfa810e65f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="rendering">
+      <UniqueIdentifier>{7e124e38-d0dd-4932-a1d5-73a0ddd31656}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data">
+      <UniqueIdentifier>{60fcef86-8c31-4666-b123-c5c86167c512}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gui">
+      <UniqueIdentifier>{6959fff4-d032-4463-b657-82319699c733}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
