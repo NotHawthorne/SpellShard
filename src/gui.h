@@ -74,8 +74,8 @@ void PopulateCharacterList(std::vector<std::string> list)
 
 	if(ImGui::Button("Login"))
 	{
-		Model m = loadModelFromFile("C:\\SpellShard\\imgui\\examples\\mesh\\cube.obj");
-		render(m);
+		/*Model m = loadModelFromFile("C:\\SpellShard\\gamedata\\models\\cube.obj");
+		render(m);*/
 	}
 
 	ImGui::End();

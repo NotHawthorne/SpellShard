@@ -6,6 +6,7 @@ static void error_callback(int error, const char* description)
 }
 
 ImGuiIO io;
+Model_OBJ obj;
 
 int main(int, char**)
 {
@@ -56,6 +57,8 @@ int main(int, char**)
         glColor3f(0.f, 0.f, 1.f);
         glVertex3f(0.f, 0.6f, 0.f);
         glEnd();
+
+		//obj.Load("C:\\SpellShard\\gamedata\\models\\cube.obj"); CRASHES
 
         ImGui::Render();
         glfwSwapBuffers(window);

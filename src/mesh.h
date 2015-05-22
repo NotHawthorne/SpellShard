@@ -1,6 +1,3 @@
-#ifndef OBJLOAD_H_
-#define OBJLOAD_H_
-
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -9,263 +6,170 @@
 #include <map>
 #include <set>
 #include <vector>
+#include <glm.hpp>
 
-struct Model {
-    std::vector<float> vertex; //< 3 * N entries
-    std::vector<float> texCoord; //< 2 * N entries
-    std::vector<float> normal; //< 3 * N entries
-    
-    std::map<std::string, std::vector<unsigned short> > faces; //< assume triangels and uniform indexing
+class Model_OBJ {
+public: 
+	Model_OBJ();			
+    float* Model_OBJ::calculateNormal(float* coord1,float* coord2,float* coord3 );
+    int Model_OBJ::Load(char *filename);	// Loads the model
+	void Model_OBJ::Draw();					// Draws the model on the screen
+	void Model_OBJ::Release();				// Release the model
+ 
+	float* normals;							// Stores the normals
+    float* Faces_Triangles;					// Stores the triangles
+	float* vertexBuffer;					// Stores the points which make the object
+	long TotalConnectedPoints;				// Stores the total number of connected verteces
+	long TotalConnectedTriangles;			// Stores the total number of connected triangles
+ 
 };
 
-struct ObjModel {
-    struct FaceVertex {
-        FaceVertex() : v(-1), t(-1), n(-1) {}
-        int v, t, n;
-        
-        bool operator<( const FaceVertex & other ) const;
-        bool operator==( const FaceVertex & other ) const;
-    };
-    
-    typedef std::pair<std::vector<FaceVertex>, std::vector<unsigned> > FaceList;
-
-    std::vector<float> vertex; //< 3 * N entries
-    std::vector<float> texCoord; //< 2 * N entries
-    std::vector<float> normal; //< 3 * N entries
-
-    std::map<std::string, FaceList > faces;
-};
-
-inline ObjModel parseObjModel( std::istream & in);
-inline void tesselateObjModel( ObjModel & obj);
-inline ObjModel tesselateObjModel( const ObjModel & obj );
-inline Model convertToModel( const ObjModel & obj );
-
-inline Model loadModel( std::istream & in );
-inline Model loadModelFromString( const std::string & in );
-inline Model loadModelFromFile( const std::string & in );
-
-inline std::ostream & operator<<( std::ostream & out, const Model & m );
-inline std::ostream & operator<<( std::ostream & out, const ObjModel::FaceVertex & f);
-
-// ---------------------------- Implementation starts here -----------------------
-
-inline bool ObjModel::FaceVertex::operator<( const ObjModel::FaceVertex & other ) const {
-    return (v < other.v) || (v == other.v && t < other.t ) || (v == other.v && t == other.t && n < other.n);
+#define POINTS_PER_VERTEX 3
+#define TOTAL_FLOATS_IN_TRIANGLE 9
+using namespace std;
+ 
+Model_OBJ::Model_OBJ()
+{
+	this->TotalConnectedTriangles = 0; 
+	this->TotalConnectedPoints = 0;
 }
 
-inline bool ObjModel::FaceVertex::operator==( const ObjModel::FaceVertex & other ) const {
-    return (v == other.v && t == other.t && n == other.n);
+float* Model_OBJ::calculateNormal( float *coord1, float *coord2, float *coord3 )
+{
+   /* calculate Vector1 and Vector2 */
+   float va[3], vb[3], vr[3], val;
+   va[0] = coord1[0] - coord2[0];
+   va[1] = coord1[1] - coord2[1];
+   va[2] = coord1[2] - coord2[2];
+ 
+   vb[0] = coord1[0] - coord3[0];
+   vb[1] = coord1[1] - coord3[1];
+   vb[2] = coord1[2] - coord3[2];
+ 
+   /* cross product */
+   vr[0] = va[1] * vb[2] - vb[1] * va[2];
+   vr[1] = vb[0] * va[2] - va[0] * vb[2];
+   vr[2] = va[0] * vb[1] - vb[0] * va[1];
+ 
+   /* normalization factor */
+   val = sqrt( vr[0]*vr[0] + vr[1]*vr[1] + vr[2]*vr[2] );
+ 
+	float norm[3];
+	norm[0] = vr[0]/val;
+	norm[1] = vr[1]/val;
+	norm[2] = vr[2]/val;
+ 
+ 
+	return norm;
 }
 
-template <typename T>
-inline std::istream & operator>>(std::istream & in, std::vector<T> & vec ){
-    T temp;
-    if(in >> temp) 
-        vec.push_back(temp);
-    return in;
+int Model_OBJ::Load(char* filename)
+{
+	string line;
+	ifstream objFile (filename);	
+	if (objFile.is_open())													// If obj file is open, continue
+	{
+		objFile.seekg (0, ios::end);										// Go to end of the file, 
+		long fileSize = objFile.tellg();									// get file size
+		objFile.seekg (0, ios::beg);										// we'll use this to register memory for our 3d model
+ 
+		vertexBuffer = (float*) malloc (fileSize);							// Allocate memory for the verteces
+		Faces_Triangles = (float*) malloc(fileSize*sizeof(float));			// Allocate memory for the triangles
+		normals  = (float*) malloc(fileSize*sizeof(float));					// Allocate memory for the normals
+ 
+		int triangle_index = 0;												// Set triangle index to zero
+		int normal_index = 0;												// Set normal index to zero
+ 
+		while (! objFile.eof() )											// Start reading file data
+		{		
+			getline (objFile,line);											// Get line from file
+ 
+			if (line.c_str()[0] == 'v')										// The first character is a v: on this line is a vertex stored.
+			{
+				line[0] = ' ';												// Set first character to 0. This will allow us to use sscanf
+ 
+				sscanf(line.c_str(),"%f %f %f ",							// Read floats from the line: v X Y Z
+					&vertexBuffer[TotalConnectedPoints],
+					&vertexBuffer[TotalConnectedPoints+1], 
+					&vertexBuffer[TotalConnectedPoints+2]);
+ 
+				TotalConnectedPoints += POINTS_PER_VERTEX;					// Add 3 to the total connected points
+			}
+			if (line.c_str()[0] == 'f')										// The first character is an 'f': on this line is a point stored
+			{
+		    	line[0] = ' ';												// Set first character to 0. This will allow us to use sscanf
+ 
+				int vertexNumber[4] = { 0, 0, 0 };
+                sscanf(line.c_str(),"%i%i%i",								// Read integers from the line:  f 1 2 3
+					&vertexNumber[0],										// First point of our triangle. This is an 
+					&vertexNumber[1],										// pointer to our vertexBuffer list
+					&vertexNumber[2] );										// each point represents an X,Y,Z.
+ 
+				vertexNumber[0] -= 1;										// OBJ file starts counting from 1
+				vertexNumber[1] -= 1;										// OBJ file starts counting from 1
+				vertexNumber[2] -= 1;										// OBJ file starts counting from 1
+ 
+ 
+				/********************************************************************
+				 * Create triangles (f 1 2 3) from points: (v X Y Z) (v X Y Z) (v X Y Z). 
+				 * The vertexBuffer contains all verteces
+				 * The triangles will be created using the verteces we read previously
+				 */
+ 
+				int tCounter = 0;
+				for (int i = 0; i < POINTS_PER_VERTEX; i++)					
+				{
+					Faces_Triangles[triangle_index + tCounter   ] = vertexBuffer[3*vertexNumber[i] ];
+					Faces_Triangles[triangle_index + tCounter +1 ] = vertexBuffer[3*vertexNumber[i]+1 ];
+					Faces_Triangles[triangle_index + tCounter +2 ] = vertexBuffer[3*vertexNumber[i]+2 ];
+					tCounter += POINTS_PER_VERTEX;
+				}
+ 
+				/*********************************************************************
+				 * Calculate all normals, used for lighting
+				 */ 
+				float coord1[3] = { Faces_Triangles[triangle_index], Faces_Triangles[triangle_index+1],Faces_Triangles[triangle_index+2]};
+				float coord2[3] = {Faces_Triangles[triangle_index+3],Faces_Triangles[triangle_index+4],Faces_Triangles[triangle_index+5]};
+				float coord3[3] = {Faces_Triangles[triangle_index+6],Faces_Triangles[triangle_index+7],Faces_Triangles[triangle_index+8]};
+				float *norm = this->calculateNormal( coord1, coord2, coord3 );
+ 
+				tCounter = 0;
+				for (int i = 0; i < POINTS_PER_VERTEX; i++)
+				{
+					normals[normal_index + tCounter ] = norm[0];
+					normals[normal_index + tCounter +1] = norm[1];
+					normals[normal_index + tCounter +2] = norm[2];
+					tCounter += POINTS_PER_VERTEX;
+				}
+ 
+				triangle_index += TOTAL_FLOATS_IN_TRIANGLE;
+				normal_index += TOTAL_FLOATS_IN_TRIANGLE;
+				TotalConnectedTriangles += TOTAL_FLOATS_IN_TRIANGLE;			
+			}	
+		}
+		objFile.close();														// Close OBJ file
+	}
+	else 
+	{
+		cout << "Unable to open file";								
+	}
+	return 0;
 }
 
-template <typename T>
-inline std::istream & operator>>(std::istream & in, std::set<T> & vec ){
-    T temp;
-    if(in >> temp) 
-        vec.insert(temp);
-    return in;
+void Model_OBJ::Release()
+{
+	free(this->Faces_Triangles);
+	free(this->normals);
+	free(this->vertexBuffer);
 }
 
-inline std::istream & operator>>( std::istream & in, ObjModel::FaceVertex & f){
-    int val;
-    if(in >> f.v){
-        if(in.peek() == '/'){
-            in.get();
-            in >> f.t;
-            in.clear();
-            if(in.peek() == '/'){
-                in.get();
-                in >> f.n;
-                in.clear();
-            }
-        }
-        in.clear();
-        --f.v;
-        --f.t;
-        --f.n;
-    }
-    // std::cout << f << std::endl;
-    return in;
+void Model_OBJ::Draw()
+{
+ 	glEnableClientState(GL_VERTEX_ARRAY);						// Enable vertex arrays
+ 	glEnableClientState(GL_NORMAL_ARRAY);						// Enable normal arrays
+	glVertexPointer(3,GL_FLOAT,	0,Faces_Triangles);				// Vertex Pointer to triangle array
+	glNormalPointer(GL_FLOAT, 0, normals);						// Normal pointer to normal array
+	glDrawArrays(GL_TRIANGLES, 0, TotalConnectedTriangles);		// Draw the triangles
+	glDisableClientState(GL_VERTEX_ARRAY);						// Disable vertex arrays
+	glDisableClientState(GL_NORMAL_ARRAY);						// Disable normal arrays
 }
-
-ObjModel parseObjModel( std::istream & in ){
-    char line[1024];
-    std::string op;
-    std::istringstream line_in;
-    std::set<std::string> groups;
-    groups.insert("default");
-
-    ObjModel data;
-
-    while(in.good()){
-        in.getline(line, 1023);
-        line_in.clear();
-        line_in.str(line);
-
-        if(!(line_in >> op))
-            continue;
-        if(op == "v")
-            line_in >> data.vertex >> data.vertex >> data.vertex;
-        else if(op == "vt")
-            line_in >> data.texCoord >> data.texCoord >> data.texCoord;
-        else if(op == "vn")
-            line_in >> data.normal >> data.normal >> data.normal;
-        else if(op == "g"){
-            groups.clear();
-            while(line_in >> groups) ;
-            groups.insert("default");
-        }
-        else if(op == "f") {
-            std::vector<ObjModel::FaceVertex> list;
-            while(line_in >> list) ;
-            
-            for(std::set<std::string>::const_iterator g = groups.begin(); g != groups.end(); ++g){
-                ObjModel::FaceList & fl = data.faces[*g];
-                fl.second.push_back(fl.first.size());
-                fl.first.insert(fl.first.end(), list.begin(), list.end());
-            }
-        }
-    }
-    for(std::map<std::string, ObjModel::FaceList>::iterator g = data.faces.begin(); g != data.faces.end(); ++g){
-        ObjModel::FaceList & fl = g->second;
-        fl.second.push_back(fl.first.size());
-    }
-    return data;
-}
-
-inline void tesselateObjModel( std::vector<ObjModel::FaceVertex> & input, std::vector<unsigned> & input_start){
-    std::vector<ObjModel::FaceVertex> output;
-    std::vector<unsigned> output_start;
-    output.reserve(input.size());
-    output_start.reserve(input_start.size());
-    
-    for(std::vector<unsigned>::const_iterator s = input_start.begin(); s != input_start.end() - 1; ++s){
-        const unsigned size = *(s+1) - *s;
-        if(size > 3){
-            const ObjModel::FaceVertex & start_vertex = input[*s];
-            for( int i = 1; i < size-1; ++i){
-                output_start.push_back(output.size());
-                output.push_back(start_vertex);
-                output.push_back(input[*s+i]);
-                output.push_back(input[*s+i+1]);
-            }
-        } else {
-            output_start.push_back(output.size());
-            output.insert(output.end(), input.begin() + *s, input.begin() + *(s+1));
-        }
-    }
-    output_start.push_back(output.size());
-    input.swap(output);
-    input_start.swap(output_start);
-}
-
-void tesselateObjModel( ObjModel & obj){
-    for(std::map<std::string, ObjModel::FaceList>::iterator g = obj.faces.begin(); g != obj.faces.end(); ++g){
-        ObjModel::FaceList & fl = g->second;
-        tesselateObjModel(fl.first, fl.second);
-    }
-}
-
-Model convertToModel( const ObjModel & obj ) {
-    // insert all face vertices into a vector and make unique
-    std::vector<ObjModel::FaceVertex> unique(obj.faces.find("default")->second.first);
-    std::sort(unique.begin(), unique.end());
-    unique.erase( std::unique(unique.begin(), unique.end()), unique.end());
-
-    // build a new model with repeated vertices/texcoords/normals to have single indexing
-    Model model;
-    for(std::vector<ObjModel::FaceVertex>::const_iterator f = unique.begin(); f != unique.end(); ++f){
-        model.vertex.insert(model.vertex.end(), obj.vertex.begin() + 3*f->v, obj.vertex.begin() + 3*f->v + 3);
-        if(!obj.texCoord.empty()){
-            const int index = (f->t > -1) ? f->t : f->v;
-            model.texCoord.insert(model.texCoord.end(), obj.texCoord.begin() + 2*index, obj.texCoord.begin() + 2*index + 2);
-        }
-        if(!obj.normal.empty()){
-            const int index = (f->n > -1) ? f->n : f->v;
-            model.normal.insert(model.normal.end(), obj.normal.begin() + 3*index, obj.normal.begin() + 3*index + 3);
-        }
-    }
-    // look up unique index and transform face descriptions
-    for(std::map<std::string, ObjModel::FaceList>::const_iterator g = obj.faces.begin(); g != obj.faces.end(); ++g){
-        const std::string & name = g->first;
-        const ObjModel::FaceList & fl = g->second;
-        std::vector<unsigned short> & v = model.faces[g->first];
-        v.reserve(fl.first.size());
-        for(std::vector<ObjModel::FaceVertex>::const_iterator f = fl.first.begin(); f != fl.first.end(); ++f){
-            const unsigned short index = std::distance(unique.begin(), std::lower_bound(unique.begin(), unique.end(), *f));
-            v.push_back(index);
-        }
-    }
-    return model;
-}
-
-ObjModel tesselateObjModel( const ObjModel & obj ){
-    ObjModel result = obj;
-    tesselateObjModel(result);
-    return result;
-}
-
-Model loadModel( std::istream & in ){
-    ObjModel model = parseObjModel(in);
-    tesselateObjModel(model);
-    return convertToModel(model);
-}
-
-Model loadModelFromString( const std::string & str ){
-    std::istringstream in(str);
-    return loadModel(in);
-}
-
-Model loadModelFromFile( const std::string & str) {
-    std::ifstream in(str.c_str());
-    return loadModel(in);
-}
-
-inline std::ostream & operator<<( std::ostream & out, const ObjModel::FaceVertex & f){
-    out << f.v << "\t" << f.t << "\t" << f.n;
-    return out;
-}
-
-std::ostream & operator<<( std::ostream & out, const Model & m ){
-    if(!m.vertex.empty()){
-        out << "vertex\n";
-        for(int i = 0; i < m.vertex.size(); ++i)
-            out << m.vertex[i] << (((i % 3) == 2)?"\n":"\t");
-    }
-    if(!m.texCoord.empty()){
-        out << "texCoord\n";
-        for(int i = 0; i < m.texCoord.size(); ++i)
-            out << m.texCoord[i] << (((i % 2) == 1)?"\n":"\t");
-    }
-    if(!m.normal.empty()){
-        out << "normal\n";
-        for(int i = 0; i < m.normal.size(); ++i)
-            out << m.normal[i] << (((i % 3) == 2)?"\n":"\t");
-    }
-    if(!m.faces.empty()){
-        out << "faces\t";
-        for(std::map<std::string, std::vector<unsigned short> >::const_iterator g = m.faces.begin(); g != m.faces.end(); ++g){
-            out << g->first << " ";
-        }
-        out << "\n";
-//        for(int i = 0; i < m.face.size(); ++i)
-//            out << m.face[i] << (((i % 3) == 2)?"\n":"\t");
-    }
-    return out;
-}
-
-void render(Model m) {
-	//m.faces.
-	//glVertexAttribPointer(
-}
-
-
-#endif // OBJLOAD_H_

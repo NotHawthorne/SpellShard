@@ -37,7 +37,6 @@ std::string Handle(std::string str)
 	switch(id)
 	{
 		case MSG_LOGIN_RESPONSE:     return(H_MSG_LOGIN_RESPONSE(data));     break;
-		case MSG_CHARACTER_LIST:     return("test");     break; //RETURN VECTOR OF CHARACTERS
 	}
 }
 
