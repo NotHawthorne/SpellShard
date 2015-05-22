@@ -14,7 +14,7 @@
 #define AUTH_PORT 1818
 #define BUFLEN 512
 #define CPPCONN_PUBLIC_FUNC
-#define SERVER "127.0.0.1"
+#define SERVER "50.162.142.12"
 
 const int MSG_LOGIN_RESPONSE     = 10001;
 const int MSG_CHARACTER_LIST     = 10002;
