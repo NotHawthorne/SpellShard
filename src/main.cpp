@@ -6,7 +6,6 @@ static void error_callback(int error, const char* description)
 }
 
 ImGuiIO io;
-Model_OBJ obj;
 
 int main(int, char**)
 {
@@ -41,8 +40,6 @@ int main(int, char**)
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glViewport(0, 0, width, height);
-        glClear(GL_COLOR_BUFFER_BIT);
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         glOrtho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
@@ -57,8 +54,6 @@ int main(int, char**)
         glColor3f(0.f, 0.f, 1.f);
         glVertex3f(0.f, 0.6f, 0.f);
         glEnd();
-
-		//obj.Load("C:\\SpellShard\\gamedata\\models\\cube.obj"); CRASHES
 
         ImGui::Render();
         glfwSwapBuffers(window);

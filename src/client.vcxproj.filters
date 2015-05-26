@@ -8,6 +8,9 @@
     <ClCompile Include="imgui_impl_glfw.cpp">
       <Filter>external\imgui</Filter>
     </ClCompile>
+    <ClCompile Include="tiny_obj_loader.cc">
+      <Filter>external\tinyobjloader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h" />
@@ -38,6 +41,12 @@
     <ClInclude Include="gui.h">
       <Filter>gui</Filter>
     </ClInclude>
+    <ClInclude Include="tiny_obj_loader.h">
+      <Filter>external\tinyobjloader</Filter>
+    </ClInclude>
+    <ClInclude Include="glut.h">
+      <Filter>external</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="external">
@@ -57,6 +66,9 @@
     </Filter>
     <Filter Include="gui">
       <UniqueIdentifier>{6959fff4-d032-4463-b657-82319699c733}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\tinyobjloader">
+      <UniqueIdentifier>{1b6b12ed-e3e5-4e20-a7bd-80673056c979}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

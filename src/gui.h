@@ -1,5 +1,5 @@
 #include"storage.h"
-#include "mesh.h"
+#include"mesh.h"
 
 #define IM_ARRAYSIZE(_ARR)          ((int)(sizeof(_ARR)/sizeof(*_ARR)))
 
@@ -74,10 +74,8 @@ void PopulateCharacterList(std::vector<std::string> list)
 
 	if(ImGui::Button("Login"))
 	{
-		/*Model m = loadModelFromFile("C:\\SpellShard\\gamedata\\models\\cube.obj");
-		render(m);*/
+		RenderModel("cave3_doorholemshanddoors.obj");
 	}
-
 	ImGui::End();
 }
 

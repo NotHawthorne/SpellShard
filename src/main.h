@@ -7,3 +7,7 @@
 #include "messaging.h"
 #include "gui.h"
 #include <gtc/matrix_transform.hpp>
+#include "tiny_obj_loader.h"
+#include "glut.h"
+#include "glm.h"
+#pragma comment(lib, "tinyobjloader.lib")
