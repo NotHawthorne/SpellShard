@@ -1,2 +1,2 @@
 # SpellShard
-Code and shit.
+Code and stuff.
